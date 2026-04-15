@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    # 指定連接 flash_ticket 資料庫，並設定時區
+    url: jdbc:mysql://localhost:3306/flash_ticket?serverTimezone=Asia/Taipei&useSSL=false
+    username: root
+    password: a123  # TODO: 替換成你的 MySQL 密碼
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      # update: 每次啟動伺服器時，若 Entity (Java 類別) 結構有變，會自動幫你修改資料表結構
+      ddl-auto: update
+    # 在終端機印出底層轉換的 SQL 語法，這對初期學習除錯非常有幫助
+    show-sql: true
