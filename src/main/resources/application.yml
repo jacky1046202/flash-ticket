@@ -1,7 +1,7 @@
 spring:
   datasource:
     # 指定連接 flash_ticket 資料庫，並設定時區
-    url: jdbc:mysql://localhost:3306/flash_ticket?serverTimezone=Asia/Taipei&useSSL=false
+    url: jdbc:mysql://localhost:3306/flash_ticket?allowPublicKeyRetrieval=true&useSSL=false
     username: root
     password: a123  # TODO: 替換成你的 MySQL 密碼
     driver-class-name: com.mysql.cj.jdbc.Driver
