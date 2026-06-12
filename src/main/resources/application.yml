@@ -6,6 +6,11 @@ spring:
     password: a123  # TODO: 替換成你的 MySQL 密碼
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
   jpa:
     hibernate:
       # update: 每次啟動伺服器時，若 Entity (Java 類別) 結構有變，會自動幫你修改資料表結構

@@ -1,0 +1,13 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: flashticket-redis
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: flashticket-rabbitmq
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # 管理介面 http://localhost:15672 (guest/guest)

@@ -1,5 +1,6 @@
 package com.example.flashticket;
 
+import com.example.flashticket.Service.StockCacheService;
 import com.example.flashticket.Service.TicketService;
 import com.example.flashticket.entity.CampaignTicket;
 import com.example.flashticket.exception.DuplicateOrderException;
@@ -31,6 +32,8 @@ class ConcurrentBuyTest {
     private CampaignTicketRepository ticketRepository;
     @Autowired
     private TicketOrderRepository orderRepository;
+    @Autowired
+    private StockCacheService stockCacheService;
 
     private Long ticketId;
 
@@ -43,6 +46,7 @@ class ConcurrentBuyTest {
         ticket.setStartTime(LocalDateTime.now().minusMinutes(5));
         ticket.setEndTime(LocalDateTime.now().plusMinutes(5));
         ticketId = ticketRepository.save(ticket).getId();
+        stockCacheService.preloadStock(ticketId, STOCK); // 搶票第一道防線在 Redis, 須先預熱
     }
 
     /** 200 個不同使用者同時搶 100 張票: 恰好成功 100 次, 不超賣 */
