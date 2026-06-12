@@ -1,6 +1,7 @@
 package com.example.flashticket.controller;
 
 import com.example.flashticket.Service.TicketService;
+import com.example.flashticket.dto.ApiResponse;
 import com.example.flashticket.entity.CampaignTicket;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -15,16 +16,12 @@ public class TicketController {
     private final TicketService ticketService;
 
     @PostMapping("/buy")
-    private String buyTicket(@RequestParam("ticketID") Long ticketID, @RequestParam("userID") Long userID){
-        try{
-            return ticketService.buyTicket(ticketID, userID);
-        }catch (Exception e){
-            return "搶票失敗：" + e.getMessage();
-        }
+    public ApiResponse<String> buyTicket(@RequestParam("ticketID") Long ticketID, @RequestParam("userID") Long userID){
+        return ApiResponse.ok(ticketService.buyTicket(ticketID, userID));
     }
 
     @GetMapping()
-    private List<CampaignTicket> showTickets(){
-        return ticketService.showTickets();
+    public ApiResponse<List<CampaignTicket>> showTickets(){
+        return ApiResponse.ok(ticketService.showTickets());
     }
 }

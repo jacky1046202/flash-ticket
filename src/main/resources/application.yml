@@ -11,4 +11,4 @@ spring:
       # update: 每次啟動伺服器時，若 Entity (Java 類別) 結構有變，會自動幫你修改資料表結構
       ddl-auto: update
     # 在終端機印出底層轉換的 SQL 語法，這對初期學習除錯非常有幫助
-    show-sql: true
+#    show-sql: true

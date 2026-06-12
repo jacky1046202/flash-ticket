@@ -14,7 +14,11 @@ import java.time.LocalDateTime;
         indexes = {
                 @Index(name = "idx_user_id", columnList = "user_id"),
                 @Index(name = "idx_campaign_ticket_id", columnList = "campaign_ticket_id")
-        }
+        },
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_user_campaign",
+                columnNames = {"user_id", "campaign_ticket_id"}
+        )
 )
 public class TicketOrder {
 
@@ -31,8 +35,9 @@ public class TicketOrder {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private String status = "PENDING"; // 直接在 Java 賦予預設值，安全又直覺
+    private OrderStatus status = OrderStatus.PENDING; // 直接在 Java 賦予預設值，安全又直覺
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
