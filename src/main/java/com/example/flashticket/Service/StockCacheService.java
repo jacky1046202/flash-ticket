@@ -50,6 +50,14 @@ public class StockCacheService {
                 List.of(stockKey(ticketId), usersKey(ticketId)), String.valueOf(userId));
     }
 
+    /**
+     * 只還原庫存、保留使用者在名單中: 下單最終失敗 (DLQ) 時使用,
+     * 庫存讓給其他人, 但該使用者的結果為終局 FAILED, 不開放重搶。
+     */
+    public void restoreStockOnly(Long ticketId) {
+        redisTemplate.opsForValue().increment(stockKey(ticketId));
+    }
+
     /** 查詢使用者是否已在搶購名單中 (訂單結果輪詢用) */
     public boolean hasUser(Long ticketId, Long userId) {
         return Boolean.TRUE.equals(

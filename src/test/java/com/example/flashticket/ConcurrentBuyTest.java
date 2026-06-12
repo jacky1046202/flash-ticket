@@ -12,12 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
@@ -66,8 +68,12 @@ class ConcurrentBuyTest {
 
         assertEquals(STOCK, success.get());
         assertEquals(THREADS - STOCK, soldOut.get());
-        assertEquals(0, ticketRepository.findById(ticketId).orElseThrow().getAvailableStock());
-        assertEquals(STOCK, orderRepository.countByCampaignTicketId(ticketId));
+
+        // 下單已改為 MQ 非同步, 等待消費者把訂單落庫
+        await().atMost(Duration.ofSeconds(15)).untilAsserted(() -> {
+            assertEquals(STOCK, orderRepository.countByCampaignTicketId(ticketId));
+            assertEquals(0, ticketRepository.findById(ticketId).orElseThrow().getAvailableStock());
+        });
     }
 
     /** 同一個使用者同時搶 200 次: 只會有 1 張訂單 */
@@ -84,8 +90,11 @@ class ConcurrentBuyTest {
         });
 
         assertEquals(1, success.get());
-        assertEquals(1, orderRepository.countByCampaignTicketId(ticketId));
-        assertEquals(STOCK - 1, ticketRepository.findById(ticketId).orElseThrow().getAvailableStock());
+
+        await().atMost(Duration.ofSeconds(15)).untilAsserted(() -> {
+            assertEquals(1, orderRepository.countByCampaignTicketId(ticketId));
+            assertEquals(STOCK - 1, ticketRepository.findById(ticketId).orElseThrow().getAvailableStock());
+        });
     }
 
     /** 用 CountDownLatch 讓所有執行緒同一瞬間出發, 製造最大競爭 */

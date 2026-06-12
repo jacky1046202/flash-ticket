@@ -11,6 +11,20 @@ spring:
       host: localhost
       port: 6379
 
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        # 消費失敗重試 3 次後不重新入列, 改送死信佇列 (DLQ)
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 1000
+
   jpa:
     hibernate:
       # update: 每次啟動伺服器時，若 Entity (Java 類別) 結構有變，會自動幫你修改資料表結構

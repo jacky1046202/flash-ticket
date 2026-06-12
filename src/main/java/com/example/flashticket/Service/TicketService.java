@@ -1,10 +1,12 @@
 package com.example.flashticket.Service;
 
+import com.example.flashticket.dto.OrderMessage;
 import com.example.flashticket.entity.CampaignTicket;
 import com.example.flashticket.exception.CampaignNotActiveException;
 import com.example.flashticket.exception.DuplicateOrderException;
 import com.example.flashticket.exception.SoldOutException;
 import com.example.flashticket.exception.TicketNotFoundException;
+import com.example.flashticket.mq.OrderMessageProducer;
 import com.example.flashticket.repository.CampaignTicketRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,7 @@ import java.util.UUID;
 public class TicketService {
     private final CampaignTicketRepository ticketRepository;
     private final StockCacheService stockCacheService;
-    private final OrderService orderService;
+    private final OrderMessageProducer orderMessageProducer;
 
     public String buyTicket(Long ticketId, Long userId){
         CampaignTicket ticket = ticketRepository.findById(ticketId)
@@ -35,15 +37,16 @@ public class TicketService {
         if(result == StockCacheService.SOLD_OUT)
             throw new SoldOutException();
 
+        // 第二步: 丟進 MQ 非同步落單, API 立即回應 (削峰填谷)
+        String orderNo = UUID.randomUUID().toString();
         try{
-            String orderNo = UUID.randomUUID().toString();
-            orderService.placeOrder(orderNo, ticketId, userId);
-            return "搶票成功, 訂單編號:" + orderNo;
+            orderMessageProducer.send(new OrderMessage(orderNo, ticketId, userId));
         }catch (RuntimeException e){
-            // DB 落單失敗 → 補償還原 Redis (最壞情況只會少賣, DB 原子扣減保證絕不超賣)
+            // 訊息發送失敗 → 補償還原 Redis, 使用者可重試
             stockCacheService.rollback(ticketId, userId);
             throw e;
         }
+        return "排隊中, 訂單編號:" + orderNo;
     }
 
     public List<CampaignTicket> showTickets(){
